@@ -1,25 +1,47 @@
-import logo from './logo.svg';
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { useState, useEffect, useContext, createContext } from "react";
+import auth from "./auth";
+import Homepage from './pages/Homepage/Homepage';
+import Signup from './pages/Signup/Signup';
+import Login from './pages/Login/Login';
+import Home from './pages/Home/Home';
+import NoPage from './pages/NoPage/NoPage';
+import Header from "./pages/components/Header/Header";
 import './App.css';
 
+const AuthenticateContext = createContext();
+
 function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(async () => {
+    const isAuth = await auth();
+    if (isAuth) {
+      setIsAuthenticated(true);
+    }
+  }, [isAuthenticated]);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <BrowserRouter>
+      <AuthenticateContext.Provider value={{ isAuth: isAuthenticated, setAuth: setIsAuthenticated }}>
+        <div className="container">
+          <div>
+            <Header />
+          </div>
+          <div>
+            <Routes>
+              <Route exact path="/" element={isAuthenticated ? <Navigate to="/home" /> : <Homepage />} />
+              <Route path="/signup" element={isAuthenticated ? <Navigate to="/home" /> : <Signup />} />
+              <Route path="/login" element={isAuthenticated ? <Navigate to="/home" /> : <Login />} />
+              <Route path="/home" element={isAuthenticated ? <Home /> : <Navigate to="/" />} />
+              <Route path="*" element={<NoPage />} />
+            </Routes>
+          </div>
+        </div>
+      </AuthenticateContext.Provider>
+    </BrowserRouter>
   );
 }
 
 export default App;
+export { AuthenticateContext };
