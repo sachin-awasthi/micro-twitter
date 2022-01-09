@@ -4,7 +4,7 @@ import auth from "./auth";
 import Homepage from './pages/Homepage/Homepage';
 import Signup from './pages/Signup/Signup';
 import Login from './pages/Login/Login';
-import Home from './pages/Home/Home';
+import Dashboard from './pages/Dashboard/Dashboard';
 import NoPage from './pages/NoPage/NoPage';
 import Header from "./pages/components/Header/Header";
 import './App.css';
@@ -30,10 +30,10 @@ function App() {
           </div>
           <div>
             <Routes>
-              <Route exact path="/" element={isAuthenticated ? <Navigate to="/home" /> : <Homepage />} />
-              <Route path="/signup" element={isAuthenticated ? <Navigate to="/home" /> : <Signup />} />
-              <Route path="/login" element={isAuthenticated ? <Navigate to="/home" /> : <Login />} />
-              <Route path="/home" element={isAuthenticated ? <Home /> : <Navigate to="/" />} />
+              <Route exact path="/" element={isAuthenticated ? <Navigate to="/dashboard" /> : <Homepage />} />
+              <Route path="/signup" element={isAuthenticated ? <Navigate to="/dashboard" /> : <Signup />} />
+              <Route path="/login" element={isAuthenticated ? <Navigate to="/dashboard" /> : <Login />} />
+              <Route path="/dashboard" element={isAuthenticated ? <Dashboard /> : <Navigate to="/" />} />
               <Route path="*" element={<NoPage />} />
             </Routes>
           </div>

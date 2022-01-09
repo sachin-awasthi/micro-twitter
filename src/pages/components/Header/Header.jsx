@@ -8,7 +8,7 @@ function Header() {
     const { isAuth, setAuth } = useContext(AuthenticateContext);
 
     async function onPressLogout() {
-        const url = 'http://localhost:8080/logout';
+        const url = '/logout';
 
         await axios.get(url, { withCredentials: true })
             .then(function (response) {
@@ -27,18 +27,19 @@ function Header() {
     return (
         <nav className="navbar navbar-expand-lg navbar-light bg-light">
             <div className="container-fluid">
-                <Link to="/">
-                    <h6 className="navbar-brand">MicroTwitter</h6>
-                </Link>
+
+                <h6 className="navbar-brand">MicroTwitter</h6>
+
                 <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                     <span className="navbar-toggler-icon"></span>
                 </button>
-                <p>Hi Sachin!</p>
                 <div className="collapse navbar-collapse" id="navbarNav">
                     <ul className="navbar-nav">
-                        <li className="nav-item">
-                            <p className="nav-link active" aria-current="page">Home</p>
-                        </li>
+                        <Link to="/">
+                            <li className="nav-item">
+                                <p className="nav-link active" aria-current="page">Home</p>
+                            </li>
+                        </Link>
                     </ul>
                 </div>
                 {isAuth ? <button onClick={onPressLogout}>Logout</button> : <></>}

@@ -16,7 +16,7 @@ app.use(cookieParser());
 
 app.use(cors({
     credentials: true,
-    origin: "http://localhost:3000",
+    origin: "/",
     exposedHeaders: ["set-cookie"]
 }));
 
@@ -96,6 +96,13 @@ app.get("/logout", authorize, async (req, res) => {
         res.status(400).send(e.toString());
     }
 });
+
+
+app.get("/dashboard", authorize, (req, res) => {
+    res.send("Good");
+});
+
+
 
 app.listen(port, () => {
     console.log(`Server started at ${port}!`);
