@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { useState, useEffect, useContext, createContext } from "react";
+import { useState, useEffect, createContext } from "react";
 import auth from "./auth";
 import Homepage from './pages/Homepage/Homepage';
 import Signup from './pages/Signup/Signup';

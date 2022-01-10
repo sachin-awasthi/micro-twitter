@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useContext } from "react";
 import axios from "axios";
 import { AuthenticateContext } from '../../../App';
 
@@ -9,7 +9,7 @@ function LoginForm() {
     const { setAuth } = useContext(AuthenticateContext);
 
     function handleLogin(e) {
-        const url = 'http://localhost:8080/login';
+        const url = '/login';
         const data = {
             username: username,
             password: password
