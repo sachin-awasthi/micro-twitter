@@ -8,7 +8,7 @@ function Header() {
     const { isAuth, setAuth } = useContext(AuthenticateContext);
 
     async function onPressLogout() {
-        const url = '/logout';
+        const url = 'http://localhost:8080/logout';
 
         await axios.get(url, { withCredentials: true })
             .then(function (response) {

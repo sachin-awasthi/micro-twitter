@@ -11,7 +11,7 @@ function SignupForm() {
     const navigate = useNavigate();
 
     function handleSignup(e) {
-        const url = '/signup';
+        const url = 'http://localhost:8080/signup';
         const data = {
             username: username,
             password: password

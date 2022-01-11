@@ -16,7 +16,7 @@ app.use(cookieParser());
 
 app.use(cors({
     credentials: true,
-    origin: "https://micro-twitter-india.herokuapp.com",
+    origin: "http://localhost:3000",
     exposedHeaders: ["set-cookie"]
 }));
 
