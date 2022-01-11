@@ -6,7 +6,6 @@ async function auth() {
     //withCredentials allow storing cookie in browser
     return await axios.get(url, { withCredentials: true })
         .then(function (response) {
-            if (!response.status) return false;
             if (response.data === "User authorized") {
                 return true;
             } else {

@@ -1,5 +1,6 @@
 const express = require("express");
 const cookieParser = require('cookie-parser');
+const path = require("path");
 const cors = require("cors");
 const bcrypt = require("bcryptjs");
 
@@ -14,13 +15,16 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 
+app.use(express.static(path.resolve(__dirname, "./client/build")));
+
+const port = process.env.PORT;
+const node_env = process.env.NODE_ENV;
+
 app.use(cors({
     credentials: true,
-    origin: "http://localhost:3000",
+    origin: node_env === 'DEV' ? "http://localhost:3000" : "https://micro-twitter-india.herokuapp.com",
     exposedHeaders: ["set-cookie"]
 }));
-
-const port = process.env.PORT || 8080;
 
 app.get("/", authorize, async (req, res) => {
     try {
