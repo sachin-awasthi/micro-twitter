@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node api/index.js",
-    "dev": "nodemon api/index.js",
+    "start": "node server/index.js",
+    "dev": "nodemon server/index.js",
     "heroku-postbuild": "cd client && npm install && npm run build"
   },
   "keywords": [],
@@ -16,6 +16,7 @@
     "dotenv": "^10.0.0"
   },
   "dependencies": {
+    "axios": "^0.25.0",
     "bcryptjs": "^2.4.3",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",

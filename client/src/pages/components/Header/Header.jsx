@@ -1,13 +1,33 @@
-import { useContext } from "react";
+import { useState, useContext } from "react";
 import axios from "axios";
 import { AuthenticateContext } from '../../../App';
-import { Link } from "react-router-dom";
+import AppBar from '@mui/material/AppBar';
+import Box from '@mui/material/Box';
+import Toolbar from '@mui/material/Toolbar';
+import IconButton from '@mui/material/IconButton';
+import Typography from '@mui/material/Typography';
+import Menu from '@mui/material/Menu';
+import Container from '@mui/material/Container';
+import Avatar from '@mui/material/Avatar';
+import Link from '@mui/material/Link';
+import Tooltip from '@mui/material/Tooltip';
+import MenuItem from '@mui/material/MenuItem';
+import PersonOutlineTwoToneIcon from '@mui/icons-material/PersonOutlineTwoTone';
 import "./Header.css";
 
 function Header() {
     const { isAuth, setAuth } = useContext(AuthenticateContext);
+    const [anchorElNav, setAnchorElNav] = useState(null);
 
-    async function onPressLogout() {
+    const username = localStorage.getItem("username");
+
+    function handleChangePassword() {
+        setAnchorElNav(null);
+        alert("Wait");
+    }
+
+    async function handleLogout() {
+        setAnchorElNav(null);
         const url = 'http://localhost:8080/logout';
 
         await axios.get(url, { withCredentials: true })
@@ -25,25 +45,64 @@ function Header() {
     }
 
     return (
-        <nav className="navbar navbar-expand-lg navbar-light bg-light">
-            <div className="container-fluid">
-                <Link to="/">
-                    <h6 className="navbar-brand">MicroTwitter</h6>
-                </Link>
-                <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                    <span className="navbar-toggler-icon"></span>
-                </button>
-                <p>Hi Sachin!</p>
-                <div className="collapse navbar-collapse" id="navbarNav">
-                    <ul className="navbar-nav">
-                        <li className="nav-item">
-                            <p className="nav-link active" aria-current="page">Home</p>
-                        </li>
-                    </ul>
-                </div>
-                {isAuth ? <button onClick={onPressLogout}>Logout</button> : <></>}
-            </div>
-        </nav>
+        <>
+            <AppBar style={{ backgroundColor: "#292826" }}>
+                <Container>
+                    <Toolbar>
+                        <Tooltip title="Powered by Twitter">
+                            <Typography
+                                variant="h6"
+                                noWrap
+                                component="div"
+                                className="nav-brand"
+                            >
+                                <Link href="https://twitter.com" target="_blank" underline="none" color="inherit">
+                                    MicroTwitter
+                                </Link>
+                            </Typography>
+                        </Tooltip>
+
+                        {
+                            isAuth &&
+                            (
+                                <Box sx={{ flexGrow: 0, position: "absolute", right: 0 }}>
+                                    <Tooltip title="Settings">
+                                        <IconButton onClick={(e) => setAnchorElNav(e.currentTarget)}>
+                                            <Avatar alt="User" src="avatar.jpeg" />
+                                        </IconButton>
+                                    </Tooltip>
+                                    <Menu
+                                        id="menu-appbar"
+                                        anchorEl={anchorElNav}
+                                        anchorOrigin={{
+                                            vertical: 'bottom',
+                                            horizontal: 'right',
+                                        }}
+                                        keepMounted
+                                        transformOrigin={{
+                                            vertical: 'top',
+                                            horizontal: 'right',
+                                        }}
+                                        open={Boolean(anchorElNav)}
+                                        onClose={() => setAnchorElNav(null)}
+                                    >
+                                        <div className="username-div">
+                                            <PersonOutlineTwoToneIcon sx={{ marginLeft: "15px" }} />
+                                            <Typography sx={{ marginLeft: "5px", fontWeight: "bold" }}>
+                                                {username}</Typography>
+                                        </div>
+                                        <hr />
+                                        <MenuItem onClick={handleChangePassword}>Change Password</MenuItem>
+                                        <MenuItem onClick={handleLogout}>Logout</MenuItem>
+                                    </Menu>
+                                </Box>
+                            )
+                        }
+                    </Toolbar>
+                </Container>
+            </AppBar>
+            <Toolbar />
+        </>
     )
 }
 

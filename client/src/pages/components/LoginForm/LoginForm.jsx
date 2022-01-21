@@ -21,6 +21,7 @@ function LoginForm() {
                 const msg = response.data.msg;
                 if (msg === "Logged in") {
                     setAuth(true);
+                    localStorage.setItem("username", username);
                 } else {
                     console.log(msg);
                 }

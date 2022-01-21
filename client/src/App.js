@@ -28,10 +28,8 @@ function App() {
     <BrowserRouter>
       <AuthenticateContext.Provider value={{ isAuth: isAuthenticated, setAuth: setIsAuthenticated }}>
         <div className="container">
-          <div>
-            <Header />
-          </div>
-          <div>
+          <Header />
+          <div className="content">
             <Routes>
               <Route exact path="/" element={isAuthenticated ? <Navigate to="/dashboard" /> : <Homepage />} />
               <Route path="/signup" element={isAuthenticated ? <Navigate to="/dashboard" /> : <Signup />} />

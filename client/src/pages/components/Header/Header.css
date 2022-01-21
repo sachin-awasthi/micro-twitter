@@ -1,3 +1,9 @@
-.navbar-brand {
-  text-decoration: none;
+.nav-brand {
+  color: #d0f7f1;
+}
+.nav-brand:hover {
+  color: #d0dcf7;
+}
+.username-div {
+  display: flex;
 }

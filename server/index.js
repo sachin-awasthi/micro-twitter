@@ -6,6 +6,7 @@ const bcrypt = require("bcryptjs");
 
 const { generateToken } = require("./jwtToken");
 const authorize = require('./authorize');
+const { fetchTweetsById } = require('./handleTweets');
 const User = require("./db/model/User");
 
 require("./db/mongoose");
@@ -76,7 +77,7 @@ app.post("/login", async (req, res) => {
                 //  maxAge: 3000 * 1000, 
                 httpOnly: true
             });
-            res.status(200).send({ msg: "Logged in", token: token });
+            res.status(200).send({ msg: "Logged in", user: username, token: token });
         }
         else {
             res.status(203).send({ msg: "Invalid credentials" });
@@ -97,6 +98,16 @@ app.get("/logout", authorize, async (req, res) => {
         });
         res.status(200).send({ msg: "Logged out", token: token });
     } catch (e) {
+        res.status(400).send(e.toString());
+    }
+});
+
+app.get("/getTweets", authorize, async (req, res) => {
+    try {
+        // let data = await fetchTweetsById("18929773");
+        res.status(200).send([{ id: 1, text: "Hello" }, { id: 2, text: "Bye" }]);
+    }
+    catch (e) {
         res.status(400).send(e.toString());
     }
 });
