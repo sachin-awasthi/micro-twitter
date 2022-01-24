@@ -5,3 +5,8 @@
 .content {
   padding: 2rem;
 }
+@media screen and (max-width: 800px) {
+  .content {
+    padding: 0.5rem;
+  }
+}

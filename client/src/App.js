@@ -14,14 +14,14 @@ const AuthenticateContext = createContext();
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  useEffect(() => {
+  useEffect(async () => {
     async function authorize() {
       const isAuth = await auth();
       if (isAuth) {
         setIsAuthenticated(true);
       }
     }
-    authorize();
+    await authorize();
   }, [isAuthenticated]);
 
   return (

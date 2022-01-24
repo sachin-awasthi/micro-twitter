@@ -3,11 +3,25 @@
   display: flex;
   flex-direction: column;
   margin: 0 15%;
-  min-height: 100vh;
+  /* min-height: 100vh; */
   padding: 1rem;
   box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
 }
-
+.content-header {
+  display: flex;
+  margin: auto;
+  font-size: 1.5rem;
+}
+.content-header a {
+  margin-left: 0.25rem;
+  text-decoration: none;
+  color: navy;
+}
+.change-user-div {
+  display: flex;
+  padding: 0;
+  margin: 0;
+}
 .collection-header {
   display: flex;
   padding-bottom: 2rem;
@@ -26,14 +40,15 @@
   display: flex;
   margin-left: 20%;
 }
-
 .tweets-div {
   padding: 2rem;
+  min-height: 50vh;
 }
 
 @media screen and (max-width: 800px) {
   .content-div {
     margin: 0;
+    padding: 0;
     box-shadow: none;
     /* box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px; */
   }
@@ -46,5 +61,8 @@
   }
   .collection-btns .expand {
     display: none;
+  }
+  .tweets-div {
+    padding: 0.25rem;
   }
 }

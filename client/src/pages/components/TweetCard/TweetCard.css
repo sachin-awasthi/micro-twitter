@@ -1,0 +1,61 @@
+.tweet-card {
+  width: 100%;
+  display: flex;
+  border: 1px solid #d0dcf7;
+  border-radius: 1em;
+  margin-top: 0.25rem;
+}
+.card-dp {
+  width: 10%;
+  padding: 0.5rem;
+}
+.card-content {
+  width: 90%;
+  display: flex;
+  flex-direction: column;
+}
+.card-header {
+  display: flex;
+  padding: 0.5rem 0;
+}
+.card-header a {
+  text-decoration: none;
+}
+.created-name-span {
+  font-weight: bold;
+  text-decoration: none;
+  color: black;
+}
+.created-username-span {
+  text-decoration: none;
+  font-weight: normal;
+  font-size: 0.9rem;
+  color: gray;
+  margin-left: 0.25rem;
+}
+.created-before {
+  margin: 0;
+  padding: 0;
+  padding-top: 0.25rem;
+  font-size: 0.75rem;
+  color: rgb(97, 96, 96);
+}
+.card-tweet {
+  padding-bottom: 1rem;
+  color: darkslategray;
+}
+
+@media screen and (max-width: 800px) {
+  .tweet-card {
+    width: 100%;
+  }
+  .created-name-span {
+    font-size: 0.8rem;
+  }
+  .created-username-span {
+    font-size: 0.75rem;
+  }
+  .created-before {
+    font-size: 0.7rem;
+  }
+}

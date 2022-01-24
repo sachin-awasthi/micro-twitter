@@ -6,8 +6,9 @@ const bcrypt = require("bcryptjs");
 
 const { generateToken } = require("./jwtToken");
 const authorize = require('./authorize');
-const { fetchTweetsById } = require('./handleTweets');
+const { getUserIdByUsername, getFollowingByUserId, getTweetsByUserId } = require('./handleTweets');
 const User = require("./db/model/User");
+const shuffle = require("./shuffle");
 
 require("./db/mongoose");
 require('dotenv').config();
@@ -104,8 +105,39 @@ app.get("/logout", authorize, async (req, res) => {
 
 app.get("/getTweets", authorize, async (req, res) => {
     try {
-        // let data = await fetchTweetsById("18929773");
-        res.status(200).send([{ id: 1, text: "Hello" }, { id: 2, text: "Bye" }]);
+
+        let userData = await getUserIdByUsername("elonmusk");
+
+        if (userData.length === 0) {
+            return res.status(200).send("Invalid Twitter Username");
+        }
+
+        let aData = {};
+        let userId = userData[0]["id"];
+
+        aData["userId"] = userId;
+        aData["name"] = userData[0]["name"];
+        aData["username"] = userData[0]["username"];
+
+        let followingData = await getFollowingByUserId(userId);
+        followingData = shuffle(followingData[0]);
+
+        let allTweets = [];
+
+        for (let fUser = 0; fUser < Math.min(5, followingData.length); fUser++) {
+            console.log(followingData[fUser]);
+            let fUserId = followingData[fUser]["id"];
+            let fTweets = await getTweetsByUserId(fUserId);
+            allTweets.push({
+                "fUserId": fUserId,
+                "fName": followingData[fUser]["name"],
+                "fUsername": followingData[fUser]["username"],
+                "fTweets": fTweets[0]
+            });
+        }
+
+        aData["allTweets"] = allTweets;
+        res.status(200).send(aData);
     }
     catch (e) {
         res.status(400).send(e.toString());
