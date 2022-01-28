@@ -1,0 +1,33 @@
+.login-div {
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  margin: 0 35%;
+  border: 1px solid lightgray;
+  border-radius: 1em;
+  padding: 2rem;
+}
+.login-heading {
+  background-image: linear-gradient(50deg, #292826, #d0dcf7);
+  background-clip: text;
+  color: transparent;
+  padding-bottom: 0.5rem;
+}
+footer {
+  padding: 0.5rem;
+  color: gray;
+  font-size: small;
+}
+
+@media screen and (max-width: 800px) {
+  .login-div {
+    margin: 0;
+    border: none;
+  }
+}
+
+@media screen and (min-width: 800px) and (max-width: 1000px) {
+  .login-div {
+    margin: 0 30%;
+  }
+}

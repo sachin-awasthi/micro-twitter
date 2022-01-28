@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import OutlinedInput from '@mui/material/OutlinedInput';
 import InputLabel from '@mui/material/InputLabel';
@@ -18,17 +18,8 @@ import PlaylistAddRoundedIcon from '@mui/icons-material/PlaylistAddRounded';
 import ListAltRoundedIcon from '@mui/icons-material/ListAltRounded';
 import './Dashboard.css';
 import TweetCard from '../components/TweetCard/TweetCard';
+import CreateCollection from '../components/CreateCollection/CreateCollection';
 
-const ITEM_HEIGHT = 48;
-const ITEM_PADDING_TOP = 8;
-const MenuProps = {
-    PaperProps: {
-        style: {
-            maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-            width: 250
-        },
-    },
-};
 const names = [
     "Business",
     "Sports"
@@ -42,32 +33,61 @@ function Dashboard() {
     const [editUserChange, setEditUserChange] = useState("");
     const [dataLoaded, setDataLoaded] = useState(null);
     const [editModeOn, setEditModeOn] = useState(null);
+    const [createCollectionOpen, setCreateCollectionOpen] = useState(false);
 
     //tweet will contain -> tweet_id, tweet_text, created_at, created_by
-    useEffect(async () => {
-        let finalTweets = "";
-        async function getTweets() {
-            const url = 'http://localhost:8080/getTweets';
-
-            await axios.get(url, { withCredentials: true })
-                .then(function (response) {
-                    setHeadUser({
-                        "username": response.data.username,
-                        "userlink": `https://twitter.com/${response.data.username}`
-                    });
-                    setEditUserChange(response.data.username);
-                    finalTweets = processTweetsData(response.data.allTweets);
-                    finalTweets.sort((a, b) => a["created_at"] >= b["created_at"] ? -1 : 1)
-                    setDataLoaded(true);
-                })
-                .catch(function (error) {
-                    console.log(error);
-                });
+    useEffect(() => {
+        async function init() {
+            await getHeadUser();
+            await getTweets("Twitter");
         }
-        await getTweets();
-        setTweets(finalTweets);
+        init();
     }, []);
 
+    useEffect(() => { }, [createCollectionOpen]);
+
+    async function getHeadUser() {
+        const url = "http://localhost:8080/getHeadUser";
+        await axios.get(url, { withCredentials: true })
+            .then(function (response) {
+                let headuser = response.data.headUser;
+                setHeadUser({
+                    "username": headuser,
+                    "userlink": `https://twitter.com/${headuser}`
+                });
+                setEditUserChange(headuser);
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
+    }
+
+    async function updateHeadUser(user) {
+        const url = "http://localhost:8080/updateHeadUser";
+        const reqBody = {
+            "headuser": user
+        }
+        await axios.post(url, reqBody, { withCredentials: true })
+            .then(function (response) { })
+            .catch(function (error) {
+                console.log(error);
+            });
+    }
+    async function getTweets(user) {
+        const url = `http://localhost:8080/getTweets/${user}`;
+
+        //withCredentials: true to pass cookies
+        await axios.get(url, { withCredentials: true })
+            .then(function (response) {
+                let finalTweets = processTweetsData(response.data.allTweets);
+                finalTweets.sort((a, b) => a["created_at"] >= b["created_at"] ? -1 : 1)
+                setDataLoaded(true);
+                setTweets(finalTweets);
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
+    }
     function processTweetsData(tData) {
         const finalTweets = [];
         for (let t = 0; t < tData.length; t++) {
@@ -107,10 +127,18 @@ function Dashboard() {
         return color;
     }
 
-    function handleSaveUser() {
+    async function handleSaveUser() {
+        let changedUser = editUserChange.trim();
+        if (changedUser === headUser.username) {
+            setEditModeOn(prevMode => !prevMode);
+            return;
+        }
+        await updateHeadUser(changedUser);
+        setDataLoaded(false);
+        await getTweets(changedUser);
         setHeadUser({
-            "username": editUserChange,
-            "userlink": `https://twitter.com/${editUserChange}`
+            "username": changedUser,
+            "userlink": `https://twitter.com/${changedUser}`
         }
         );
         setEditModeOn(prevMode => !prevMode);
@@ -125,6 +153,14 @@ function Dashboard() {
             typeof value === 'string' ? value.split(',') : value,
         );
     };
+
+    function handleCreateCollection() {
+        setCreateCollectionOpen("kj");
+    }
+
+    function handleShowCollections() {
+
+    }
 
     return (
         <div className="content-div">
@@ -159,7 +195,7 @@ function Dashboard() {
                             :
                             (
                                 <>
-                                    <a href={headUser.userlink} target="_blank">
+                                    <a href={headUser.userlink} target="_blank" rel="noreferrer">
                                         {headUser.username}
                                     </a>
                                     <Tooltip title="Change">
@@ -212,13 +248,13 @@ function Dashboard() {
                 <div className="collection-btns">
                     <div className="expand">
                         <Tooltip title="Create new collection">
-                            <Button sx={{ m: 1, borderRadius: "50px" }} variant="contained" startIcon={<PlaylistAddRoundedIcon />}>
+                            <Button onClick={handleCreateCollection} sx={{ m: 1, borderRadius: "50px" }} variant="contained" startIcon={<PlaylistAddRoundedIcon />}>
                                 Create
                             </Button>
                         </Tooltip>
-
+                        <CreateCollection state={createCollectionOpen, setCreateCollectionOpen} />
                         <Tooltip title="My collections">
-                            <Button sx={{ m: 1, borderRadius: "50px" }} variant="contained" startIcon={<ListAltRoundedIcon />}>
+                            <Button onClick={handleShowCollections} sx={{ m: 1, borderRadius: "50px" }} variant="contained" startIcon={<ListAltRoundedIcon />}>
                                 List
                             </Button>
                         </Tooltip>
@@ -250,7 +286,7 @@ function Dashboard() {
                     <CircularProgress />
                 </Box>
             }
-        </div >
+        </div>
     );
 }
 

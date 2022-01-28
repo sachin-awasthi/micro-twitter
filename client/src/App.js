@@ -31,10 +31,10 @@ function App() {
           <Header />
           <div className="content">
             <Routes>
-              <Route exact path="/" element={isAuthenticated ? <Navigate to="/dashboard" /> : <Homepage />} />
+              <Route exact path="/" element={isAuthenticated ? <Navigate to="/dashboard" /> : <Navigate to="/login" />} />
               <Route path="/signup" element={isAuthenticated ? <Navigate to="/dashboard" /> : <Signup />} />
               <Route path="/login" element={isAuthenticated ? <Navigate to="/dashboard" /> : <Login />} />
-              <Route path="/dashboard" element={isAuthenticated ? <Dashboard /> : <Navigate to="/" />} />
+              <Route path="/dashboard" element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" />} />
               <Route path="*" element={<NoPage />} />
             </Routes>
           </div>

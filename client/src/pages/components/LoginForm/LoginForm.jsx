@@ -1,14 +1,35 @@
 import { useState, useContext } from "react";
 import axios from "axios";
+import TextField from '@mui/material/TextField';
+import Button from '@mui/material/Button';
+import Snackbar from '@mui/material/Snackbar';
+import InputAdornment from '@mui/material/InputAdornment';
+import PersonIcon from '@mui/icons-material/Person';
+import LockIcon from '@mui/icons-material/Lock';
+import LoginIcon from '@mui/icons-material/Login';
 import { AuthenticateContext } from '../../../App';
+
+const regex = /^[0-9a-zA-Z_]+$/i;
 
 function LoginForm() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
 
+    const [usernameState, setUsernameState] = useState({ error: false, helper: "" });
+    const [passwordState, setPasswordState] = useState({ error: false, helper: "" });
+
+    const [snackbarState, setSnackbarState] = useState({
+        open: false,
+        message: ""
+    });
+
     const { setAuth } = useContext(AuthenticateContext);
 
     function handleLogin(e) {
+        if (!validateInputs()) {
+            e.preventDefault();
+            return;
+        }
         const url = 'http://localhost:8080/login';
         const data = {
             username: username,
@@ -23,7 +44,10 @@ function LoginForm() {
                     setAuth(true);
                     localStorage.setItem("username", username);
                 } else {
-                    console.log(msg);
+                    setSnackbarState({
+                        open: true,
+                        message: msg
+                    });
                 }
             })
             .catch(function (error) {
@@ -32,17 +56,66 @@ function LoginForm() {
         e.preventDefault();
     }
 
+    function validateInputs() {
+        let isValid = false;
+
+        if (!username && !password) {
+            setUsernameState({
+                error: true,
+                helper: "Username cannot be blank"
+            });
+            setPasswordState({
+                error: true,
+                helper: "Password cannot be blank"
+            });
+        } else if (!username) {
+            setUsernameState({
+                error: true,
+                helper: "Username cannot be blank"
+            });
+        } else if (!password) {
+            setPasswordState({
+                error: true,
+                helper: "Password cannot be blank"
+            });
+        } else if (!regex.test(username)) {
+            setUsernameState({
+                error: true,
+                helper: "Invalid username"
+            });
+        } else {
+            isValid = true;
+        }
+        return isValid;
+    }
+
+
     function handleInputChange(e) {
         const inputId = e.target.id;
         const inputValue = e.target.value;
 
         switch (inputId) {
-            case "inputUsername":
+            case "username-input":
                 setUsername(inputValue);
+                if (inputValue && !regex.test(inputValue)) {
+                    setUsernameState({
+                        error: true,
+                        helper: "Invalid username"
+                    });
+                } else {
+                    setUsernameState({
+                        error: false,
+                        helper: ""
+                    });
+                }
                 break;
 
-            case "inputPassword":
+            case "password-input":
                 setPassword(inputValue);
+                setPasswordState({
+                    error: false,
+                    helper: ""
+                });
                 break;
 
             default:
@@ -54,16 +127,69 @@ function LoginForm() {
         <>
             <form onSubmit={handleLogin}>
                 <div className="form-group">
-                    <label htmlFor="exampleInputEmail1">Username</label>
-                    <input type="name" value={username} onChange={handleInputChange} className="form-control" id="inputUsername" aria-describedby="emailHelp" placeholder="Enter username" />
-                    <small id="emailHelp" className="form-text text-muted"></small>
+                    <TextField className="form-input"
+                        id="username-input"
+                        required
+                        autoFocus={true}
+                        label="Username"
+                        value={username}
+                        onChange={handleInputChange}
+                        error={usernameState.error}
+                        helperText={usernameState.helper}
+                        InputLabelProps={{
+                            shrink: true
+                        }}
+                        InputProps={{
+                            startAdornment: (
+                                <InputAdornment position="start">
+                                    <PersonIcon />
+                                </InputAdornment>
+                            )
+                        }}
+                    />
                 </div>
                 <div className="form-group">
-                    <label htmlFor="exampleInputPassword1">Password</label>
-                    <input type="password" value={password} onChange={handleInputChange} className="form-control" id="inputPassword" placeholder="Password" />
+                    <TextField className="form-input"
+                        id="password-input"
+                        required
+                        label="Password"
+                        type="password"
+                        value={password}
+                        onChange={handleInputChange}
+                        error={passwordState.error}
+                        helperText={passwordState.helper}
+                        InputLabelProps={{
+                            shrink: true,
+                        }}
+                        InputProps={{
+                            startAdornment: (
+                                <InputAdornment position="start">
+                                    <LockIcon />
+                                </InputAdornment>
+                            )
+                        }}
+                    />
                 </div>
-                <button type="submit" className="btn btn-primary">Submit</button>
+                <Button type="submit" onClick={handleLogin} variant="outlined" color="success"
+                    startIcon={<LoginIcon />}>
+                    LOGIN
+                </Button>
             </form>
+            <Snackbar
+                anchorOrigin={{
+                    vertical: "bottom",
+                    horizontal: "center"
+                }}
+                open={snackbarState.open}
+                autoHideDuration={2000}
+                onClose={() =>
+                    setSnackbarState({
+                        open: false,
+                        message: ""
+                    })
+                }
+                message={snackbarState.message}
+            />
         </>
     )
 }

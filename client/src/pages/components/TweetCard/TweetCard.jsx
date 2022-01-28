@@ -4,13 +4,10 @@ import Paper from '@mui/material/Paper';
 import "./TweetCard.css";
 
 function TweetCard({ value }) {
-    if (!value) return <></>;
-    let { tweet_id, tweet_content, created_by_name, created_by_username, created_at, avatar_color } = value;
+    let { tweet_content, created_by_name, created_by_username, created_at, avatar_color } = value;
     let profileLink = "https://twitter.com/" + created_by_username;
 
-    let initials = created_by_name.split(" ");
-    initials = initials.map((item) => item[0]);
-    initials = initials.join("").substring(0, 2);
+    let initials = created_by_name[0];
 
     let currentTime = new Date();
     let createdTime = new Date(created_at);
@@ -40,7 +37,7 @@ function TweetCard({ value }) {
             </div>
             <div className="card-content">
                 <div className="card-header">
-                    <a href={profileLink} target="_blank">
+                    <a href={profileLink} target="_blank" rel="noreferrer">
                         <span className="created-name-span">{created_by_name}</span>
                         <span className="created-username-span">@{created_by_username}</span>
                     </a>

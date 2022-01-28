@@ -8,6 +8,7 @@ const { generateToken } = require("./jwtToken");
 const authorize = require('./authorize');
 const { getUserIdByUsername, getFollowingByUserId, getTweetsByUserId } = require('./handleTweets');
 const User = require("./db/model/User");
+const headUser = require("./db/model/headUser");
 const shuffle = require("./shuffle");
 
 require("./db/mongoose");
@@ -41,11 +42,15 @@ app.post("/signup", async (req, res) => {
         const { username, password } = req.body;
         const checkUser = await User.findOne({ username: username }).exec();
         if (checkUser) {
-            throw Error("Username already exists!");
+            return res.status(203).send("Username already exists!");
         }
         const hash = await bcrypt.hash(password, 10);
         const user = new User({ username: username, password: hash, createdOn: Date.now() });
         await user.save();
+
+        //default headUser = "@Twitter"
+        const headuser = new headUser({ username: username, headUser: "Twitter" });
+        await headuser.save();
 
         res.status(200).send("Signup Successful");
 
@@ -72,12 +77,16 @@ app.post("/login", async (req, res) => {
             }
             const token = generateToken(payload);
 
+            currentUser = username;
             //maxAge is in milliseconds
             //httpOnly prevents cookie to be accessible from document.cookie, it is only sent in request headers
             res.cookie("jwt-token", token, {
                 //  maxAge: 3000 * 1000, 
                 httpOnly: true
             });
+            res.cookie("currentUser", username, {
+                httpOnly: true
+            })
             res.status(200).send({ msg: "Logged in", user: username, token: token });
         }
         else {
@@ -103,10 +112,12 @@ app.get("/logout", authorize, async (req, res) => {
     }
 });
 
-app.get("/getTweets", authorize, async (req, res) => {
+app.get("/getTweets/:headUser", authorize, async (req, res) => {
     try {
 
-        let userData = await getUserIdByUsername("elonmusk");
+        const headUser = req.params.headUser;
+
+        let userData = await getUserIdByUsername(headUser);
 
         if (userData.length === 0) {
             return res.status(200).send("Invalid Twitter Username");
@@ -140,6 +151,34 @@ app.get("/getTweets", authorize, async (req, res) => {
         res.status(200).send(aData);
     }
     catch (e) {
+        res.status(400).send(e.toString());
+    }
+});
+
+app.get("/getHeadUser", authorize, async (req, res) => {
+    try {
+        const currentUser = req.cookies["currentUser"];
+        const user = await headUser.findOne({ username: currentUser }).exec();
+        res.status(200).send({ "headUser": user.headUser });
+    }
+    catch (e) {
+        res.status(400).send(e.toString());
+    }
+});
+
+app.post("/updateHeadUser", authorize, async (req, res) => {
+    try {
+        const { headuser } = req.body;
+        const currentUser = req.cookies["currentUser"];
+
+        const user = await headUser.findOne({ username: currentUser }).exec();
+
+        user["headUser"] = headuser;
+        await user.save();
+
+        res.status(200).send("HeadUser updated");
+
+    } catch (e) {
         res.status(400).send(e.toString());
     }
 });
