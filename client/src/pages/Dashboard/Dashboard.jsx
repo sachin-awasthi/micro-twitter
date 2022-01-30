@@ -8,6 +8,7 @@ import ListItemText from '@mui/material/ListItemText';
 import Select from '@mui/material/Select';
 import Checkbox from '@mui/material/Checkbox';
 import Input from '@mui/material/Input';
+import Snackbar from '@mui/material/Snackbar';
 import { Button, IconButton, Tooltip } from "@mui/material";
 import Box from '@mui/material/Box';
 import CircularProgress from '@mui/material/CircularProgress';
@@ -16,9 +17,10 @@ import SaveIcon from '@mui/icons-material/Save';
 import CloseIcon from '@mui/icons-material/Close';
 import PlaylistAddRoundedIcon from '@mui/icons-material/PlaylistAddRounded';
 import ListAltRoundedIcon from '@mui/icons-material/ListAltRounded';
-import './Dashboard.css';
 import TweetCard from '../components/TweetCard/TweetCard';
 import CreateCollection from '../components/CreateCollection/CreateCollection';
+import ViewCollection from '../components/ViewCollection/ViewCollection';
+import './Dashboard.css';
 
 const names = [
     "Business",
@@ -28,29 +30,35 @@ const names = [
 
 function Dashboard() {
     const [personName, setPersonName] = useState([]);
-    const [tweets, setTweets] = useState("");
+    const [tweets, setTweets] = useState([]);
+    const [following, setFollowing] = useState([]);
     const [headUser, setHeadUser] = useState({});
     const [editUserChange, setEditUserChange] = useState("");
     const [dataLoaded, setDataLoaded] = useState(null);
     const [editModeOn, setEditModeOn] = useState(null);
-    const [createCollectionOpen, setCreateCollectionOpen] = useState(false);
+    const [createCollectionState, setCreateCollectionState] = useState(false);
+    const [viewCollectionState, setViewCollectionState] = useState(false);
+
+    const [snackbarState, setSnackbarState] = useState({
+        open: false,
+        message: ""
+    });
 
     //tweet will contain -> tweet_id, tweet_text, created_at, created_by
     useEffect(() => {
         async function init() {
-            await getHeadUser();
-            await getTweets("Twitter");
+            const headuser = await getHeadUser();
+            await getTweets(headuser);
         }
         init();
     }, []);
 
-    useEffect(() => { }, [createCollectionOpen]);
-
     async function getHeadUser() {
         const url = "http://localhost:8080/getHeadUser";
+        let headuser = "";
         await axios.get(url, { withCredentials: true })
             .then(function (response) {
-                let headuser = response.data.headUser;
+                headuser = response.data.headUser;
                 setHeadUser({
                     "username": headuser,
                     "userlink": `https://twitter.com/${headuser}`
@@ -60,6 +68,7 @@ function Dashboard() {
             .catch(function (error) {
                 console.log(error);
             });
+        return headuser;
     }
 
     async function updateHeadUser(user) {
@@ -79,10 +88,24 @@ function Dashboard() {
         //withCredentials: true to pass cookies
         await axios.get(url, { withCredentials: true })
             .then(function (response) {
-                let finalTweets = processTweetsData(response.data.allTweets);
-                finalTweets.sort((a, b) => a["created_at"] >= b["created_at"] ? -1 : 1)
                 setDataLoaded(true);
-                setTweets(finalTweets);
+                if (response.data.userFollowing) {
+                    let finalFollowing = response.data.userFollowing;
+                    finalFollowing.map((item) => {
+                        item["avatar_color"] = generateAvatarColor(item.followingName);
+                    });
+                    setFollowing(finalFollowing);
+                }
+                if (response.data.allTweets) {
+                    let finalTweets = processTweetsData(response.data.allTweets);
+                    finalTweets.sort((a, b) => a["created_at"] >= b["created_at"] ? -1 : 1)
+                    setTweets(finalTweets);
+                } else {
+                    setSnackbarState({
+                        open: true,
+                        message: response.data
+                    });
+                }
             })
             .catch(function (error) {
                 console.log(error);
@@ -93,7 +116,7 @@ function Dashboard() {
         for (let t = 0; t < tData.length; t++) {
             let tweet = tData[t];
             let fTweets = tweet["fTweets"];
-            let avatarColor = generateAvatarColor(tweet["fUsername"], 100, 100);
+            let avatarColor = generateAvatarColor(tweet["fUsername"]);
             if (!fTweets) continue;
 
             for (let ft = 0; ft < fTweets.length; ft++) {
@@ -128,7 +151,13 @@ function Dashboard() {
     }
 
     async function handleSaveUser() {
+        setEditModeOn(prevMode => !prevMode);
         let changedUser = editUserChange.trim();
+        setHeadUser({
+            "username": changedUser,
+            "userlink": `https://twitter.com/${changedUser}`
+        });
+
         if (changedUser === headUser.username) {
             setEditModeOn(prevMode => !prevMode);
             return;
@@ -136,12 +165,6 @@ function Dashboard() {
         await updateHeadUser(changedUser);
         setDataLoaded(false);
         await getTweets(changedUser);
-        setHeadUser({
-            "username": changedUser,
-            "userlink": `https://twitter.com/${changedUser}`
-        }
-        );
-        setEditModeOn(prevMode => !prevMode);
     }
 
     function handleMultiSelect(e) {
@@ -153,14 +176,6 @@ function Dashboard() {
             typeof value === 'string' ? value.split(',') : value,
         );
     };
-
-    function handleCreateCollection() {
-        setCreateCollectionOpen("kj");
-    }
-
-    function handleShowCollections() {
-
-    }
 
     return (
         <div className="content-div">
@@ -248,26 +263,24 @@ function Dashboard() {
                 <div className="collection-btns">
                     <div className="expand">
                         <Tooltip title="Create new collection">
-                            <Button onClick={handleCreateCollection} sx={{ m: 1, borderRadius: "50px" }} variant="contained" startIcon={<PlaylistAddRoundedIcon />}>
+                            <Button onClick={() => setCreateCollectionState(true)} sx={{ m: 1, borderRadius: "50px" }} variant="outlined" startIcon={<PlaylistAddRoundedIcon />}>
                                 Create
                             </Button>
                         </Tooltip>
-                        <CreateCollection state={createCollectionOpen, setCreateCollectionOpen} />
                         <Tooltip title="My collections">
-                            <Button onClick={handleShowCollections} sx={{ m: 1, borderRadius: "50px" }} variant="contained" startIcon={<ListAltRoundedIcon />}>
-                                List
+                            <Button onClick={() => setViewCollectionState(true)} sx={{ m: 1, borderRadius: "50px" }} variant="outlined" startIcon={<ListAltRoundedIcon />}>
+                                View
                             </Button>
                         </Tooltip>
-
                     </div>
                     <div className="collapse">
                         <Tooltip title="Create new collection">
-                            <IconButton color="info" aria-label="add a collection" size="large">
+                            <IconButton onClick={() => setCreateCollectionState(true)} color="info" aria-label="add a collection" size="large">
                                 <PlaylistAddRoundedIcon fontSize="inherit" />
                             </IconButton>
                         </Tooltip>
                         <Tooltip title="My collections">
-                            <IconButton color="info" aria-label="my collections" size="large">
+                            <IconButton onClick={() => setViewCollectionState(true)} color="info" aria-label="my collections" size="large">
                                 <ListAltRoundedIcon fontSize="inherit" />
                             </IconButton>
                         </Tooltip>
@@ -286,7 +299,24 @@ function Dashboard() {
                     <CircularProgress />
                 </Box>
             }
-        </div>
+            <CreateCollection state={[createCollectionState, setCreateCollectionState, following, setFollowing]} />
+            <ViewCollection state={[viewCollectionState, setViewCollectionState, following, setFollowing]} />
+            <Snackbar
+                anchorOrigin={{
+                    vertical: "bottom",
+                    horizontal: "center"
+                }}
+                open={snackbarState.open}
+                autoHideDuration={2000}
+                onClose={() =>
+                    setSnackbarState({
+                        open: false,
+                        message: ""
+                    })
+                }
+                message={snackbarState.message}
+            />
+        </div >
     );
 }
 

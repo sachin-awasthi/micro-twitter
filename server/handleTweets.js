@@ -6,13 +6,16 @@ let config = {
 
 async function getDataFromTwitterAPI(url) {
     let data = [];
-    await axios.get(url, config)
-        .then(function (response) {
-            data.push(response.data.data);
-        })
-        .catch(function (error) {
-            console.log(error);
-        });
+    try {
+
+        await axios.get(url, config)
+            .then(function (response) {
+                data.push(response.data.data);
+            })
+            .catch(function (error) { });
+    } catch (e) {
+        console.log(e);
+    }
 
     return data;
 }

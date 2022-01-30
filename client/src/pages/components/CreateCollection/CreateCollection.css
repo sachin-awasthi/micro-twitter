@@ -1,0 +1,48 @@
+.following-div {
+  display: flex;
+  padding: 1rem;
+  border: 1px solid lightgray;
+  border-radius: 1em;
+}
+.following-avatar {
+  width: 10%;
+}
+.following-info {
+  display: flex;
+  flex-direction: row;
+  width: 80%;
+}
+.following-name {
+  padding: 0.25rem;
+  margin-top: 0.25rem;
+  font-weight: bold;
+  color: black;
+}
+.following-username {
+  color: gray;
+  font-size: 0.8rem;
+  padding: 0.4rem;
+  margin-top: 0.25rem;
+}
+.follow-btn {
+  width: 10%;
+  margin-right: 0.5rem;
+  padding: 0;
+}
+
+@media screen and (max-width: 800px) {
+  .following-avatar {
+    padding: 0.25rem;
+  }
+  .following-info {
+    flex-direction: column;
+    margin-top: 0.25rem;
+    margin-left: 0.75rem;
+    font-size: small;
+  }
+  .following-name,
+  .following-username {
+    padding: 0;
+    margin: 0;
+  }
+}

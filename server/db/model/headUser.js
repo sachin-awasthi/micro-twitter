@@ -4,6 +4,9 @@ const headUserSchema = new mongoose.Schema({
     username: {
         type: String
     },
+    usernameLowerCase: {
+        type: String
+    },
     headUser: {
         type: String
     }

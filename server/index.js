@@ -9,6 +9,7 @@ const authorize = require('./authorize');
 const { getUserIdByUsername, getFollowingByUserId, getTweetsByUserId } = require('./handleTweets');
 const User = require("./db/model/User");
 const headUser = require("./db/model/headUser");
+const Collection = require("./db/model/Collection");
 const shuffle = require("./shuffle");
 
 require("./db/mongoose");
@@ -40,16 +41,16 @@ app.get("/", authorize, async (req, res) => {
 app.post("/signup", async (req, res) => {
     try {
         const { username, password } = req.body;
-        const checkUser = await User.findOne({ username: username }).exec();
+        const checkUser = await User.findOne({ usernameLowerCase: username.toLowerCase() }).exec();
         if (checkUser) {
             return res.status(203).send("Username already exists!");
         }
         const hash = await bcrypt.hash(password, 10);
-        const user = new User({ username: username, password: hash, createdOn: Date.now() });
+        const user = new User({ username: username, usernameLowerCase: username.toLowerCase(), password: hash, createdOn: Date.now() });
         await user.save();
 
         //default headUser = "@Twitter"
-        const headuser = new headUser({ username: username, headUser: "Twitter" });
+        const headuser = new headUser({ username: username, usernameLowerCase: username.toLowerCase(), headUser: "Twitter" });
         await headuser.save();
 
         res.status(200).send("Signup Successful");
@@ -64,7 +65,7 @@ app.post("/login", async (req, res) => {
         const { username, password } = req.body;
 
         const hash = await bcrypt.hash(password, 10);
-        const user1 = await User.findOne({ username: username }).exec();
+        const user1 = await User.findOne({ usernameLowerCase: username.toLowerCase() }).exec();
 
         let dbpassword = user1 ? user1.password : "";
 
@@ -119,7 +120,7 @@ app.get("/getTweets/:headUser", authorize, async (req, res) => {
 
         let userData = await getUserIdByUsername(headUser);
 
-        if (userData.length === 0) {
+        if (userData.length === 0 || !userData[0]) {
             return res.status(200).send("Invalid Twitter Username");
         }
 
@@ -131,22 +132,42 @@ app.get("/getTweets/:headUser", authorize, async (req, res) => {
         aData["username"] = userData[0]["username"];
 
         let followingData = await getFollowingByUserId(userId);
+
+        if (followingData.length === 0 || !followingData[0]) {
+            return res.status(200).send("No tweets available");
+        }
+
         followingData = shuffle(followingData[0]);
 
-        let allTweets = [];
+        let allTweets = [], following = [];
 
-        for (let fUser = 0; fUser < Math.min(5, followingData.length); fUser++) {
-            console.log(followingData[fUser]);
+        for (let fUser = 0; fUser < followingData.length; fUser++) {
             let fUserId = followingData[fUser]["id"];
+            let fFollowingName = followingData[fUser]["name"];
+            let fFollowingUserName = followingData[fUser]["username"];
+
+            following.push({
+                "followingUserId": fUserId,
+                "followingName": fFollowingName,
+                "followingUsername": fFollowingUserName
+            });
+            if (fUser >= 5) continue;
             let fTweets = await getTweetsByUserId(fUserId);
+
+            if (fTweets.length === 0 || !fTweets[0]) {
+                continue;
+            }
             allTweets.push({
                 "fUserId": fUserId,
-                "fName": followingData[fUser]["name"],
-                "fUsername": followingData[fUser]["username"],
+                "fName": fFollowingName,
+                "fUsername": fFollowingUserName,
                 "fTweets": fTweets[0]
             });
         }
 
+        console.log(allTweets[0].fTweets[0])
+
+        aData["userFollowing"] = following;
         aData["allTweets"] = allTweets;
         res.status(200).send(aData);
     }
@@ -158,7 +179,7 @@ app.get("/getTweets/:headUser", authorize, async (req, res) => {
 app.get("/getHeadUser", authorize, async (req, res) => {
     try {
         const currentUser = req.cookies["currentUser"];
-        const user = await headUser.findOne({ username: currentUser }).exec();
+        const user = await headUser.findOne({ usernameLowerCase: currentUser.toLowerCase() }).exec();
         res.status(200).send({ "headUser": user.headUser });
     }
     catch (e) {
@@ -171,12 +192,34 @@ app.post("/updateHeadUser", authorize, async (req, res) => {
         const { headuser } = req.body;
         const currentUser = req.cookies["currentUser"];
 
-        const user = await headUser.findOne({ username: currentUser }).exec();
+        const user = await headUser.findOne({ usernameLowerCase: currentUser.toLowerCase() }).exec();
 
         user["headUser"] = headuser;
         await user.save();
 
         res.status(200).send("HeadUser updated");
+
+    } catch (e) {
+        res.status(400).send(e.toString());
+    }
+});
+
+app.post("/createCollection", authorize, async (req, res) => {
+    try {
+        const currentUser = req.cookies["currentUser"];
+        const collectionName = req.body["collection"];
+        const selectedUsers = req.body["usersSelected"];
+
+        // check if a collection name exists
+        const checkCollection = await Collection.findOne({ usernameLowerCase: currentUser.toLowerCase(), collectionNameLowerCase: collectionName.toLowerCase() }).exec();
+        if (checkCollection) {
+            return res.status(203).send("Collection already exists!");
+        }
+
+        const newCollection = new Collection({ username: currentUser, usernameLowerCase: currentUser.toLowerCase(), collectionName: collectionName, collectionNameLowerCase: collectionName.toLowerCase(), collectionUserIds: selectedUsers });
+        await newCollection.save();
+
+        res.status(200).send("Collection created");
 
     } catch (e) {
         res.status(400).send(e.toString());

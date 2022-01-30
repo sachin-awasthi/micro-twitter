@@ -41,8 +41,16 @@
   color: rgb(97, 96, 96);
 }
 .card-tweet {
+  display: flex;
+  flex-direction: column;
   padding-bottom: 1rem;
   color: darkslategray;
+}
+.open-tweet-link {
+  text-decoration: none;
+  font-size: small;
+  font-weight: bold;
+  color: navy;
 }
 
 @media screen and (max-width: 800px) {

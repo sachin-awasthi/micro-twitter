@@ -4,9 +4,9 @@ import Paper from '@mui/material/Paper';
 import "./TweetCard.css";
 
 function TweetCard({ value }) {
-    let { tweet_content, created_by_name, created_by_username, created_at, avatar_color } = value;
+    let { tweet_id, tweet_content, created_by_name, created_by_username, created_at, avatar_color } = value;
     let profileLink = "https://twitter.com/" + created_by_username;
-
+    let tweetLink = profileLink + "/status/" + tweet_id;
     let initials = created_by_name[0];
 
     let currentTime = new Date();
@@ -45,7 +45,12 @@ function TweetCard({ value }) {
                     <p className="created-before">{createdDiff}</p>
                 </div>
                 <div className="card-tweet">
-                    {tweet_content}
+                    <div>
+                        {tweet_content}
+                    </div>
+                    <div style={{ paddingTop: "0.25rem" }}>
+                        <a className="open-tweet-link" href={tweetLink} target="_blank" rel="noreferrer">Show in Twitter</a>
+                    </div>
                 </div>
             </div>
         </div>
