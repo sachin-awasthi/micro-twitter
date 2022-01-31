@@ -38,6 +38,7 @@ function Dashboard() {
     const [editModeOn, setEditModeOn] = useState(null);
     const [createCollectionState, setCreateCollectionState] = useState(false);
     const [viewCollectionState, setViewCollectionState] = useState(false);
+    const [myCollections, setMyCollections] = useState([]);
 
     const [snackbarState, setSnackbarState] = useState({
         open: false,
@@ -48,10 +49,23 @@ function Dashboard() {
     useEffect(() => {
         async function init() {
             const headuser = await getHeadUser();
+            // await getCollections();
             await getTweets(headuser);
         }
         init();
     }, []);
+
+    async function getCollections() {
+        const url = "http://localhost:8080/getMyCollections";
+
+        await axios.get(url, { withCredentials: true })
+            .then(function (response) {
+
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
+    }
 
     async function getHeadUser() {
         const url = "http://localhost:8080/getHeadUser";
@@ -227,6 +241,7 @@ function Dashboard() {
                     </h6>
                 </div>
             </div>
+            {/*
             <div className="collection-header">
                 <div className="collection-select">
                     <FormControl sx={{
@@ -260,6 +275,7 @@ function Dashboard() {
                         </Select>
                     </FormControl>
                 </div>
+                
                 <div className="collection-btns">
                     <div className="expand">
                         <Tooltip title="Create new collection">
@@ -286,8 +302,9 @@ function Dashboard() {
                         </Tooltip>
                     </div>
                 </div>
+             
             </div>
-
+            */}
             {
                 dataLoaded ? (<div className="tweets-div">
                     {(tweets && tweets.length > 0) &&
@@ -300,7 +317,7 @@ function Dashboard() {
                 </Box>
             }
             <CreateCollection state={[createCollectionState, setCreateCollectionState, following, setFollowing]} />
-            <ViewCollection state={[viewCollectionState, setViewCollectionState, following, setFollowing]} />
+            <ViewCollection state={[viewCollectionState, setViewCollectionState, myCollections, setMyCollections]} />
             <Snackbar
                 anchorOrigin={{
                     vertical: "bottom",

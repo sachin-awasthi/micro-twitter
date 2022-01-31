@@ -86,13 +86,13 @@ function Header() {
                                         open={Boolean(anchorElNav)}
                                         onClose={() => setAnchorElNav(null)}
                                     >
-                                        <div className="username-div">
-                                            <PersonOutlineTwoToneIcon sx={{ marginLeft: "15px" }} />
+                                        <div style={{ padding: "0.5rem" }} className="username-div">
+                                            <PersonOutlineTwoToneIcon sx={{ marginLeft: "5px" }} />
                                             <Typography sx={{ marginLeft: "5px", fontWeight: "bold" }}>
                                                 {username}</Typography>
                                         </div>
                                         <hr />
-                                        <MenuItem onClick={handleChangePassword}>Change Password</MenuItem>
+                                        {/* <MenuItem onClick={handleChangePassword}>Change Password</MenuItem> */}
                                         <MenuItem onClick={handleLogout}>Logout</MenuItem>
                                     </Menu>
                                 </Box>

@@ -19,8 +19,6 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 
-app.use(express.static(path.resolve(__dirname, "./client/build")));
-
 const port = process.env.PORT;
 const node_env = process.env.NODE_ENV;
 
@@ -49,8 +47,8 @@ app.post("/signup", async (req, res) => {
         const user = new User({ username: username, usernameLowerCase: username.toLowerCase(), password: hash, createdOn: Date.now() });
         await user.save();
 
-        //default headUser = "@Twitter"
-        const headuser = new headUser({ username: username, usernameLowerCase: username.toLowerCase(), headUser: "Twitter" });
+        //default headUser = "@sachin_rt"
+        const headuser = new headUser({ username: username, usernameLowerCase: username.toLowerCase(), headUser: "sachin_rt" });
         await headuser.save();
 
         res.status(200).send("Signup Successful");
@@ -140,8 +138,10 @@ app.get("/getTweets/:headUser", authorize, async (req, res) => {
         followingData = shuffle(followingData[0]);
 
         let allTweets = [], following = [];
-
+        let totalTweetCount = 0;
         for (let fUser = 0; fUser < followingData.length; fUser++) {
+            //for Testing - limit to 10 Tweets for lesser Twitter API calls
+            if (totalTweetCount >= 10) continue;
             let fUserId = followingData[fUser]["id"];
             let fFollowingName = followingData[fUser]["name"];
             let fFollowingUserName = followingData[fUser]["username"];
@@ -151,12 +151,15 @@ app.get("/getTweets/:headUser", authorize, async (req, res) => {
                 "followingName": fFollowingName,
                 "followingUsername": fFollowingUserName
             });
-            if (fUser >= 5) continue;
             let fTweets = await getTweetsByUserId(fUserId);
 
-            if (fTweets.length === 0 || !fTweets[0]) {
+            if (!fTweets[0] || fTweets.length === 0) {
                 continue;
             }
+            if (fTweets[0].length > 5) {
+                fTweets[0] = fTweets[0].slice(0, 5);
+            }
+            totalTweetCount += fTweets[0].length;
             allTweets.push({
                 "fUserId": fUserId,
                 "fName": fFollowingName,
@@ -164,8 +167,6 @@ app.get("/getTweets/:headUser", authorize, async (req, res) => {
                 "fTweets": fTweets[0]
             });
         }
-
-        console.log(allTweets[0].fTweets[0])
 
         aData["userFollowing"] = following;
         aData["allTweets"] = allTweets;
@@ -220,6 +221,41 @@ app.post("/createCollection", authorize, async (req, res) => {
         await newCollection.save();
 
         res.status(200).send("Collection created");
+
+    } catch (e) {
+        res.status(400).send(e.toString());
+    }
+});
+
+app.get("/getMyCollections", authorize, async (req, res) => {
+    try {
+        const currentUser = req.cookies["currentUser"];
+
+        // check if a collection name exists
+        const collections = await Collection.find({ usernameLowerCase: currentUser.toLowerCase() }).exec();
+        const collectionTweets = [];
+
+        for (let i = 0; i < collections.length; i++) {
+            let obj = {
+                collectionName: collections[i]["collectionName"]
+            }
+            let collectionUserIds = collections[i]["collectionUserIds"];
+
+            for (let j = 0; j < collectionsUserIds.length; j++) {
+                let tweets = getTweetsByUserId(collectionUserIds[j]);
+                if (!tweets[0] || tweets.length === 0) continue;
+
+
+                obj["collectionTweets"].push(tweets[0]);
+
+                //for Testing - limit to 3 for lesser Twitter API calls
+                if (j >= 3) break;
+            }
+        }
+
+        res.status(200).send({
+            myCollections: collections
+        });
 
     } catch (e) {
         res.status(400).send(e.toString());
