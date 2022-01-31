@@ -30,7 +30,7 @@ function LoginForm() {
             e.preventDefault();
             return;
         }
-        const url = 'http://localhost:8080/login';
+        const url = 'https://micro-twitter-server.herokuapp.com/login';
         const data = {
             username: username,
             password: password

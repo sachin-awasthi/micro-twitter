@@ -86,7 +86,7 @@ function CreateCollection(props) {
     }
 
     function handleSaveCollection() {
-        const url = 'http://localhost:8080/createCollection';
+        const url = 'https://micro-twitter-server.herokuapp.com/createCollection';
         let data = {
             collection: collectionName,
             usersSelected: selectedUsers

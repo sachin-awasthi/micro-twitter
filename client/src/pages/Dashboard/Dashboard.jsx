@@ -56,7 +56,7 @@ function Dashboard() {
     }, []);
 
     async function getCollections() {
-        const url = "http://localhost:8080/getMyCollections";
+        const url = "https://micro-twitter-server.herokuapp.com/getMyCollections";
 
         await axios.get(url, { withCredentials: true })
             .then(function (response) {
@@ -68,7 +68,7 @@ function Dashboard() {
     }
 
     async function getHeadUser() {
-        const url = "http://localhost:8080/getHeadUser";
+        const url = "https://micro-twitter-server.herokuapp.com/getHeadUser";
         let headuser = "";
         await axios.get(url, { withCredentials: true })
             .then(function (response) {
@@ -86,7 +86,7 @@ function Dashboard() {
     }
 
     async function updateHeadUser(user) {
-        const url = "http://localhost:8080/updateHeadUser";
+        const url = "https://micro-twitter-server.herokuapp.com/updateHeadUser";
         const reqBody = {
             "headuser": user
         }
@@ -97,7 +97,7 @@ function Dashboard() {
             });
     }
     async function getTweets(user) {
-        const url = `http://localhost:8080/getTweets/${user}`;
+        const url = `https://micro-twitter-server.herokuapp.com/getTweets/${user}`;
 
         //withCredentials: true to pass cookies
         await axios.get(url, { withCredentials: true })

@@ -1,7 +1,7 @@
 import axios from "axios";
 
 async function auth() {
-    const url = 'http://localhost:8080/';
+    const url = 'https://micro-twitter-server.herokuapp.com/';
 
     //withCredentials allow storing cookie in browser
     return await axios.get(url, { withCredentials: true })

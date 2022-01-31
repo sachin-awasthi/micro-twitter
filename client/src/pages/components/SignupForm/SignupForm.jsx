@@ -34,7 +34,7 @@ function SignupForm() {
             e.preventDefault();
             return;
         }
-        const url = 'http://localhost:8080/signup';
+        const url = 'https://micro-twitter-server.herokuapp.com/signup';
         const data = {
             username: username,
             password: password

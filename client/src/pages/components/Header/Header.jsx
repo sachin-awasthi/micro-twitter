@@ -28,7 +28,7 @@ function Header() {
 
     async function handleLogout() {
         setAnchorElNav(null);
-        const url = 'http://localhost:8080/logout';
+        const url = 'https://micro-twitter-server.herokuapp.com/logout';
 
         await axios.get(url, { withCredentials: true })
             .then(function (response) {
