@@ -24,7 +24,7 @@ const node_env = process.env.NODE_ENV;
 
 app.use(cors({
     credentials: true,
-    origin: node_env === 'DEV' ? "http://localhost:3000" : "https://micro-twitter-india.herokuapp.com",
+    origin: "https://micro-twitter.netlify.app",
     exposedHeaders: ["set-cookie"]
 }));
 

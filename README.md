@@ -1,1 +1,1 @@
-https://micro-twitter-india.herokuapp.com/
+https://micro-twitter.netlify.app/
