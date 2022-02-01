@@ -1,5 +1,1 @@
-# Redirects from what the browser requests to what we serve
-/              /login
-/login  /login
-/signup              /signup
-/dashboard            /dashboard
+/*    /index.html   200
