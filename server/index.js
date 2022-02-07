@@ -19,13 +19,13 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 
-const port = process.env.PORT;
+const port = process.env.PORT || 8080;
 const node_env = process.env.NODE_ENV;
 
 app.use(cors({
     credentials: true,
-    origin: "https://micro-twitter.netlify.app",
-    exposedHeaders: ["set-cookie"]
+    origin: ["https://micro-twitter.netlify.app"],
+    methods: ['GET', 'POST']
 }));
 
 app.get("/", authorize, async (req, res) => {
@@ -79,14 +79,17 @@ app.post("/login", async (req, res) => {
             currentUser = username;
             //maxAge is in milliseconds
             //httpOnly prevents cookie to be accessible from document.cookie, it is only sent in request headers
-            res.cookie("jwt-token", token, {
-                //  maxAge: 3000 * 1000, 
-                httpOnly: true
-            });
-            res.cookie("currentUser", username, {
-                httpOnly: true
-            })
-            res.status(200).send({ msg: "Logged in", user: username, token: token });
+            // res.cookie("jwt-token", token, {
+            //     //  maxAge: 3000 * 1000, 
+            //     httpOnly: true
+            // });
+            // res.cookie("currentUser", username, {
+            //     httpOnly: true
+            // })
+
+            const user = await headUser.findOne({ usernameLowerCase: currentUser.toLowerCase() }).exec();
+
+            res.status(200).send({ msg: "Logged in", user: username, token: token, "headUser": user.headUser });
         }
         else {
             res.status(203).send({ msg: "Invalid credentials" });
@@ -99,12 +102,12 @@ app.post("/login", async (req, res) => {
 
 app.get("/logout", authorize, async (req, res) => {
     try {
-        const token = req.cookies["jwt-token"];
-
-        res.cookie("jwt-token", token, {
-            maxAge: 0,
-            httpOnly: true
-        });
+        // const token = req.cookies["jwt-token"];
+        const token = req.headers["jwt-token"];
+        // res.cookie("jwt-token", token, {
+        //     maxAge: 0,
+        //     httpOnly: true
+        // });
         res.status(200).send({ msg: "Logged out", token: token });
     } catch (e) {
         res.status(400).send(e.toString());
@@ -179,7 +182,9 @@ app.get("/getTweets/:headUser", authorize, async (req, res) => {
 
 app.get("/getHeadUser", authorize, async (req, res) => {
     try {
-        const currentUser = req.cookies["currentUser"];
+        // const currentUser = req.cookies["currentUser"];
+        const currentUser = req.headers["current-user"];
+
         const user = await headUser.findOne({ usernameLowerCase: currentUser.toLowerCase() }).exec();
         res.status(200).send({ "headUser": user.headUser });
     }
@@ -191,7 +196,9 @@ app.get("/getHeadUser", authorize, async (req, res) => {
 app.post("/updateHeadUser", authorize, async (req, res) => {
     try {
         const { headuser } = req.body;
-        const currentUser = req.cookies["currentUser"];
+        // const currentUser = req.cookies["currentUser"];
+        const currentUser = req.headers["current-user"];
+
 
         const user = await headUser.findOne({ usernameLowerCase: currentUser.toLowerCase() }).exec();
 
@@ -207,7 +214,8 @@ app.post("/updateHeadUser", authorize, async (req, res) => {
 
 app.post("/createCollection", authorize, async (req, res) => {
     try {
-        const currentUser = req.cookies["currentUser"];
+        // const currentUser = req.cookies["currentUser"];
+        const currentUser = req.headers["current-user"];
         const collectionName = req.body["collection"];
         const selectedUsers = req.body["usersSelected"];
 
@@ -229,7 +237,8 @@ app.post("/createCollection", authorize, async (req, res) => {
 
 app.get("/getMyCollections", authorize, async (req, res) => {
     try {
-        const currentUser = req.cookies["currentUser"];
+        // const currentUser = req.cookies["currentUser"];
+        const currentUser = req.headers["current-user"];
 
         // check if a collection name exists
         const collections = await Collection.find({ usernameLowerCase: currentUser.toLowerCase() }).exec();

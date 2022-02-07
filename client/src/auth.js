@@ -4,7 +4,12 @@ async function auth() {
     const url = 'https://micro-twitter-server.herokuapp.com/';
 
     //withCredentials allow storing cookie in browser
-    return await axios.get(url, { withCredentials: true })
+    return await axios.get(url, {
+        headers: {
+            "jwt-token": localStorage.getItem("jwt-token"),
+            "currentUser": localStorage.getItem("username")
+        }, withCredentials: true
+    })
         .then(function (response) {
             if (response.data === "User authorized") {
                 return true;

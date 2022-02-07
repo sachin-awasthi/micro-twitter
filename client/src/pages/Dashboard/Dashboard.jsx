@@ -58,7 +58,12 @@ function Dashboard() {
     async function getCollections() {
         const url = "https://micro-twitter-server.herokuapp.com/getMyCollections";
 
-        await axios.get(url, { withCredentials: true })
+        await axios.get(url, {
+            headers: {
+                "jwt-token": localStorage.getItem("jwt-token"),
+                "current-user": localStorage.getItem("username")
+            }, withCredentials: true
+        })
             .then(function (response) {
 
             })
@@ -70,7 +75,12 @@ function Dashboard() {
     async function getHeadUser() {
         const url = "https://micro-twitter-server.herokuapp.com/getHeadUser";
         let headuser = "";
-        await axios.get(url, { withCredentials: true })
+        await axios.get(url, {
+            headers: {
+                "jwt-token": localStorage.getItem("jwt-token"),
+                "current-user": localStorage.getItem("username")
+            }, withCredentials: true
+        })
             .then(function (response) {
                 headuser = response.data.headUser;
                 setHeadUser({
@@ -90,17 +100,29 @@ function Dashboard() {
         const reqBody = {
             "headuser": user
         }
-        await axios.post(url, reqBody, { withCredentials: true })
+        await axios.post(url, reqBody, {
+            headers: {
+                "jwt-token": localStorage.getItem("jwt-token"),
+                "current-user": localStorage.getItem("username")
+            }, withCredentials: true
+        })
             .then(function (response) { })
             .catch(function (error) {
                 console.log(error);
             });
     }
     async function getTweets(user) {
+        if (!user) user = localStorage.getItem("headUser");
         const url = `https://micro-twitter-server.herokuapp.com/getTweets/${user}`;
 
         //withCredentials: true to pass cookies
-        await axios.get(url, { withCredentials: true })
+        await axios.get(url, {
+            headers: {
+                "jwt-token": localStorage.getItem("jwt-token"),
+                "current-user": localStorage.getItem("username")
+            },
+            withCredentials: true
+        })
             .then(function (response) {
                 setDataLoaded(true);
                 if (response.data.userFollowing) {
@@ -109,6 +131,11 @@ function Dashboard() {
                         item["avatar_color"] = generateAvatarColor(item.followingName);
                     });
                     setFollowing(finalFollowing);
+                    setHeadUser({
+                        "username": user,
+                        "userlink": `https://twitter.com/${user}`
+                    });
+                    setEditUserChange(user);
                 }
                 if (response.data.allTweets) {
                     let finalTweets = processTweetsData(response.data.allTweets);

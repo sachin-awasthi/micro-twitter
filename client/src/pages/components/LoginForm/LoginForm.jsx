@@ -40,9 +40,13 @@ function LoginForm() {
         axios.post(url, data, { withCredentials: true })
             .then(function (response) {
                 const msg = response.data.msg;
+                const token = response.data.token;
+                const headUser = response.data.headUser;
                 if (msg === "Logged in") {
                     setAuth(true);
+                    localStorage.setItem("jwt-token", token);
                     localStorage.setItem("username", username);
+                    localStorage.setItem("headUser", headUser);
                 } else {
                     setSnackbarState({
                         open: true,

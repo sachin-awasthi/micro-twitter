@@ -30,10 +30,17 @@ function Header() {
         setAnchorElNav(null);
         const url = 'https://micro-twitter-server.herokuapp.com/logout';
 
-        await axios.get(url, { withCredentials: true })
+        await axios.get(url, {
+            headers: {
+                "jwt-token": localStorage.getItem("jwt-token")
+            },
+            withCredentials: true
+        })
             .then(function (response) {
                 const msg = response.data.msg;
                 if (msg === "Logged out") {
+                    localStorage.removeItem("jwt-token");
+                    localStorage.removeItem("username");
                     setAuth(false);
                 } else {
                     console.log(msg);
